@@ -253,7 +253,7 @@ function render(){
   c.width = W; c.height = H;
   const x = c.getContext('2d'), L = (W-CW)/2, T = (H-CH)/2, M = L + CW/2;
   x.fillStyle = '#fff'; x.fillRect(0,0,W,H);
-  x.strokeStyle = '#a8a8a8'; x.lineWidth = 6; x.strokeRect(L,T,CW,CH);              // cut line
+  x.strokeStyle = '#000'; x.lineWidth = 9; x.strokeRect(L,T,CW,CH);              // cut line
   x.setLineDash([26,22]); x.beginPath(); x.moveTo(M,T); x.lineTo(M,T+CH); x.stroke(); x.setLineDash([]); // fold
   if(img) x.drawImage(frontCover(), M+PAD, T+PAD);
   if($('#back').checked) badge(x, L+CW/4, T+CH/2);
