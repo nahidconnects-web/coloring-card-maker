@@ -52,32 +52,41 @@ main p{margin:0;font-size:13px;color:var(--mut)}
 main{height:100vh;overflow:hidden;min-height:0}
 main canvas{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 110px)}
 @media(max-width:900px){.app{height:auto;overflow:visible}main{height:auto}main canvas{width:100%;max-height:none}}
+.app{grid-template-columns:76px 300px 1fr}
+.rail{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:14px}
+.rail button{width:60px;height:50px;border:0;border-radius:10px;background:none;color:#5f5f66;font:inherit;font-size:12px;cursor:pointer}
+.rail button:hover{background:var(--bg)}.rail button.on{background:#e8f1fd;color:#0066cc;font-weight:600}
+section[data-tab]{display:none}section[data-tab].on{display:block}
+.row{min-height:38px;padding:6px 14px}.fld{padding:8px 14px;gap:4px}.emo{padding:6px 14px}h2{margin-top:6px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.rail{flex-direction:row;justify-content:center;border:0;padding:8px 0}}
 </style>
 </head>
 <body>
 <div class="app">
+<nav class="rail" aria-label="Settings sections"><button type="button" data-t="image">Image</button><button type="button" data-t="quality">Quality</button><button type="button" data-t="sheet">Sheet</button><button type="button" data-t="back">Back</button></nav>
 <aside>
 <div class="sc">
   <div class="brand"><h1>Coloring Card Maker</h1><span>Free · private</span></div>
-  <input type="file" id="file" accept="image/png,image/jpeg,image/webp">
+  <section data-tab="image"><input type="file" id="file" accept="image/png,image/jpeg,image/webp">
   <label class="drop" id="drop" for="file" tabindex="0">Choose coloring image<small id="fname">PNG or JPG · or drop it here</small></label>
+  </section>
 
-  <h2>Quality</h2>
+  <section data-tab="quality"><h2>Quality</h2>
   <div class="grp">
     <p id="qual">Add an image to check print quality</p>
     <label class="row"><span>Sharper enlarging</span><input type="checkbox" id="enh" checked></label>
     <label class="row"><span>Clean lines (pure B&amp;W)</span><input type="checkbox" id="clean" checked></label>
     <div><button type="button" class="sec" id="ai" disabled>AI Enhance for line art</button><p id="aist" role="status"></p></div>
-  </div>
+  </div></section>
 
-  <h2>Sheet</h2>
+  <section data-tab="sheet"><h2>Sheet</h2>
   <div class="grp">
     <div class="row" style="cursor:default"><label for="page">Paper</label><select id="page"><option value="letter">Letter</option><option value="a4">A4</option></select></div>
     <div class="row" style="cursor:default"><label for="mode">Image fit</label><select id="mode"><option value="fit">Fit whole</option><option value="fill">Fill (crop)</option></select></div>
     <div class="row" style="cursor:default"><label for="outline">Card outline</label><select id="outline"><option value="full">Full line</option><option value="corners">Corner marks only</option><option value="none">None</option></select></div>
-  </div>
+  </div></section>
 
-  <h2>Back cover</h2>
+  <section data-tab="back"><h2>Back cover</h2>
   <div class="grp">
     <label class="row"><span>Show badge</span><input type="checkbox" id="back" checked></label>
     <div class="row" style="cursor:default"><label for="bstyle">Badge style</label><select id="bstyle"><option value="classic">Classic (double border)</option><option value="single">Single border</option><option value="dashed">Dashed border</option><option value="corners">Corner brackets</option><option value="none">No border</option></select></div>
@@ -87,7 +96,7 @@ main canvas{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 110px)
     <div class="fld"><label for="tag">Bottom text (emoji and Bangla work)</label><input type="text" id="tag" value="Made with Love ❤️"></div>
     <div class="emo" id="emo" aria-label="Insert emoji"></div>
     <label class="row"><span>Emoji as line art</span><input type="checkbox" id="line" checked></label>
-  </div>
+  </div></section>
 </div>
 <div class="ft">
   <button id="dl" disabled>Download PDF</button>
@@ -362,6 +371,12 @@ $('#dl').onclick = () => {
   pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), undefined, 'FAST');
   pdf.save('printable_greeting_card.pdf');
 };
+function showTab(t){
+  document.querySelectorAll('.rail button').forEach(b => b.classList.toggle('on', b.dataset.t===t));
+  document.querySelectorAll('section[data-tab]').forEach(c => c.classList.toggle('on', c.dataset.tab===t));
+}
+document.querySelectorAll('.rail button').forEach(b => b.onclick = () => showTab(b.dataset.t));
+showTab('image');
 render();
 </script>
 </body>
