@@ -48,6 +48,10 @@ main{display:flex;flex-direction:column;align-items:center;justify-content:cente
 main canvas{display:block;width:100%;max-width:960px;height:auto;background:#fff;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 18px 44px rgba(0,0,0,.12)}
 main p{margin:0;font-size:13px;color:var(--mut)}
 @media(max-width:900px){.app{grid-template-columns:1fr}aside{position:static;height:auto;border:0}.sc{overflow:visible}main{order:-1;padding:16px}}
+.app{height:100vh;overflow:hidden}
+main{height:100vh;overflow:hidden;min-height:0}
+main canvas{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 110px)}
+@media(max-width:900px){.app{height:auto;overflow:visible}main{height:auto}main canvas{width:100%;max-height:none}}
 </style>
 </head>
 <body>
