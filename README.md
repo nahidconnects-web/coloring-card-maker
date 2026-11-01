@@ -13,7 +13,7 @@ Turns a coloring page into a printable folding greeting card (front = your image
 1. Push this repo to GitHub.
 2. Cloudflare Dashboard -> Workers & Pages -> Create -> Pages -> Connect to Git -> pick this repo.
 3. Build command: *(leave empty)*. Build output directory: `web`.
-4. Deploy. Every `git push` redeploys automatically.
+4. Deploy. Every `git push` redeploys automatically..
 
 ## AI Enhance (optional, best for line art)
 Uses Real-ESRGAN x4plus anime 6B (ONNX) running in the browser.
