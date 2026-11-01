@@ -70,11 +70,13 @@ main p{margin:0;font-size:13px;color:var(--mut)}
   <div class="grp">
     <div class="row" style="cursor:default"><label for="page">Paper</label><select id="page"><option value="letter">Letter</option><option value="a4">A4</option></select></div>
     <div class="row" style="cursor:default"><label for="mode">Image fit</label><select id="mode"><option value="fit">Fit whole</option><option value="fill">Fill (crop)</option></select></div>
+    <div class="row" style="cursor:default"><label for="outline">Card outline</label><select id="outline"><option value="full">Full line</option><option value="corners">Corner marks only</option><option value="none">None</option></select></div>
   </div>
 
   <h2>Back cover</h2>
   <div class="grp">
     <label class="row"><span>Show badge</span><input type="checkbox" id="back" checked></label>
+    <div class="row" style="cursor:default"><label for="bstyle">Badge style</label><select id="bstyle"><option value="classic">Classic (double border)</option><option value="single">Single border</option><option value="dashed">Dashed border</option><option value="corners">Corner brackets</option><option value="none">No border</option></select></div>
     <div class="fld"><label for="top">Top text</label><input type="text" id="top" value="Coloring &amp; Creation by:"></div>
     <div class="row" style="cursor:default"><label for="icon">Icon</label><select id="icon"><option value="heart">Heart</option><option value="star">Star</option><option value="none">None</option></select></div>
     <div class="fld"><label for="tpl">Bottom text template</label><select id="tpl"></select></div>
@@ -233,11 +235,21 @@ function star(x,cx,cy,R){
   }
   x.closePath(); x.stroke();
 }
+function corners(x,a,b,w,h,len,lw){
+  x.lineWidth = lw; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath();
+  [[a,b,1,1],[a+w,b,-1,1],[a,b+h,1,-1],[a+w,b+h,-1,-1]].forEach(([px,py,sx,sy]) => {
+    x.moveTo(px+sx*len,py); x.lineTo(px,py); x.lineTo(px,py+sy*len);
+  });
+  x.stroke(); x.lineCap = 'butt';
+}
 function badge(x, cx, cy){
   const bw = 1110, bh = 810, x0 = cx-bw/2, y0 = cy-bh/2, bot = y0+bh, inner = bw-270;
   x.strokeStyle = '#000'; x.lineJoin = 'round'; x.lineCap = 'butt';
-  rrect(x,x0,y0,bw,bh,84,12);
-  rrect(x,x0+30,y0+30,bw-60,bh-60,60,6);
+  const st = $('#bstyle').value;
+  if(st==='classic'){ rrect(x,x0,y0,bw,bh,84,12); rrect(x,x0+30,y0+30,bw-60,bh-60,60,6); }
+  else if(st==='single') rrect(x,x0,y0,bw,bh,84,12);
+  else if(st==='dashed'){ x.setLineDash([36,24]); rrect(x,x0,y0,bw,bh,84,9); x.setLineDash([]); }
+  else if(st==='corners') corners(x,x0,y0,bw,bh,170,12);
   richLine(x, $('#top').value.trim() || 'Coloring & Creation by:', cx, y0+210, 'bold', 54, inner);
   x.lineWidth = 8; x.lineCap = 'round'; x.setLineDash([0.1,22]);          // dotted name line
   x.beginPath(); x.moveTo(x0+150,y0+405); x.lineTo(x0+bw-150,y0+405); x.stroke();
@@ -253,7 +265,8 @@ function render(){
   c.width = W; c.height = H;
   const x = c.getContext('2d'), L = (W-CW)/2, T = (H-CH)/2, M = L + CW/2;
   x.fillStyle = '#fff'; x.fillRect(0,0,W,H);
-  x.strokeStyle = '#000'; x.lineWidth = 9; x.strokeRect(L,T,CW,CH);              // cut line
+  x.strokeStyle = '#000'; x.lineWidth = 9; const ol = $('#outline').value;      // cut line
+  if(ol==='full') x.strokeRect(L,T,CW,CH); else if(ol==='corners') corners(x,L,T,CW,CH,90,9);
   x.setLineDash([26,22]); x.beginPath(); x.moveTo(M,T); x.lineTo(M,T+CH); x.stroke(); x.setLineDash([]); // fold
   if(img) x.drawImage(frontCover(), M+PAD, T+PAD);
   if($('#back').checked) badge(x, L+CW/4, T+CH/2);
