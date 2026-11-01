@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coloring Card Maker</title>
+<style>
+:root{--bg:#f5f5f7;--ink:#1d1d1f;--mut:#6e6e73;--line:#e5e5ea;--acc:#0071e3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,"Segoe UI","Noto Sans Bengali",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:384px 1fr;min-height:100vh}
+aside{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sc{flex:1;overflow:auto;padding:24px 20px 10px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 18px}
+.brand h1{margin:0;font-size:19px;font-weight:600;letter-spacing:-.015em}
+.brand span{font-size:12.5px;color:var(--mut)}
+h2{margin:24px 0 8px 4px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.grp{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.grp>*{border-top:1px solid var(--line)}.grp>:first-child{border-top:0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;min-height:46px;margin:0;cursor:pointer}
+.fld{display:flex;flex-direction:column;gap:6px;padding:11px 14px}
+.fld label{font-size:13px;color:var(--mut)}
+input[type=text]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid transparent;border-radius:8px;padding:9px 11px;width:100%}
+input[type=text]:focus{outline:0;border-color:var(--acc);background:#fff}
+select{appearance:none;-webkit-appearance:none;font:inherit;color:var(--ink);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center;border:0;border-radius:8px;padding:8px 30px 8px 12px;cursor:pointer}
+.fld select{width:100%}
+input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:42px;height:26px;border-radius:13px;background:#d1d1d6;position:relative;cursor:pointer;margin:0;transition:background .15s}
+input[type=checkbox]::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+input[type=checkbox]:checked{background:var(--acc)}input[type=checkbox]:checked::after{transform:translateX(16px)}
+:focus-visible{outline:3px solid rgba(0,113,227,.5);outline-offset:2px}
+#file{position:absolute;opacity:0;pointer-events:none}
+.drop{display:flex;flex-direction:column;align-items:center;gap:2px;padding:20px 16px;border:1.5px dashed #c7c7cc;border-radius:12px;background:#fafafc;cursor:pointer;text-align:center;font-weight:600;color:#0066cc}
+.drop small{font-weight:400;color:var(--mut);font-size:13px;word-break:break-all}
+.drop:hover,.drop.over{background:#f0f6ff;border-color:var(--acc)}
+#qual{margin:0;padding:12px 14px;font-size:14px;font-weight:600;color:var(--mut)}
+#qual.good{color:#1a7f37}#qual.fair{color:#9a5b00}#qual.low{color:#c4262e}
+.sec{display:block;width:calc(100% - 28px);margin:6px 14px 4px;padding:10px;border:0;border-radius:9px;background:var(--bg);color:#0066cc;font:600 14px inherit;font-family:inherit;cursor:pointer}
+.sec:hover{background:#ececf0}.sec:disabled{opacity:.45;cursor:not-allowed}
+#aist{margin:0;padding:0 14px 10px;font-size:12.5px;color:var(--mut);min-height:0}#aist:empty{display:none}
+.emo{display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px}
+.emo button{font-size:19px;line-height:1;padding:6px 7px;border:0;border-radius:8px;background:var(--bg);cursor:pointer}
+.emo button:hover{background:#e8e8ed}
+.ft{padding:14px 20px 18px;border-top:1px solid var(--line);background:#fff}
+#dl{width:100%;padding:13px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-family:inherit;font-weight:600;font-size:16px;cursor:pointer}
+#dl:hover:not(:disabled){background:#0077ed}#dl:disabled{background:#b9d6f6;cursor:not-allowed}
+.note{font-size:12.5px;color:var(--mut);margin:9px 2px 0;line-height:1.4}
+main{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:14px;min-width:0}
+main canvas{display:block;width:100%;max-width:960px;height:auto;background:#fff;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 18px 44px rgba(0,0,0,.12)}
+main p{margin:0;font-size:13px;color:var(--mut)}
+@media(max-width:900px){.app{grid-template-columns:1fr}aside{position:static;height:auto;border:0}.sc{overflow:visible}main{order:-1;padding:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+<div class="sc">
+  <div class="brand"><h1>Coloring Card Maker</h1><span>Free · private</span></div>
+  <input type="file" id="file" accept="image/png,image/jpeg,image/webp">
+  <label class="drop" id="drop" for="file" tabindex="0">Choose coloring image<small id="fname">PNG or JPG · or drop it here</small></label>
+
+  <h2>Quality</h2>
+  <div class="grp">
+    <p id="qual">Add an image to check print quality</p>
+    <label class="row"><span>Sharper enlarging</span><input type="checkbox" id="enh" checked></label>
+    <label class="row"><span>Clean lines (pure B&amp;W)</span><input type="checkbox" id="clean" checked></label>
+    <div><button type="button" class="sec" id="ai" disabled>AI Enhance for line art</button><p id="aist" role="status"></p></div>
+  </div>
+
+  <h2>Sheet</h2>
+  <div class="grp">
+    <div class="row" style="cursor:default"><label for="page">Paper</label><select id="page"><option value="letter">Letter</option><option value="a4">A4</option></select></div>
+    <div class="row" style="cursor:default"><label for="mode">Image fit</label><select id="mode"><option value="fit">Fit whole</option><option value="fill">Fill (crop)</option></select></div>
+  </div>
+
+  <h2>Back cover</h2>
+  <div class="grp">
+    <label class="row"><span>Show badge</span><input type="checkbox" id="back" checked></label>
+    <div class="fld"><label for="top">Top text</label><input type="text" id="top" value="Coloring &amp; Creation by:"></div>
+    <div class="row" style="cursor:default"><label for="icon">Icon</label><select id="icon"><option value="heart">Heart</option><option value="star">Star</option><option value="none">None</option></select></div>
+    <div class="fld"><label for="tpl">Bottom text template</label><select id="tpl"></select></div>
+    <div class="fld"><label for="tag">Bottom text (emoji and Bangla work)</label><input type="text" id="tag" value="Made with Love ❤️"></div>
+    <div class="emo" id="emo" aria-label="Insert emoji"></div>
+    <label class="row"><span>Emoji as line art</span><input type="checkbox" id="line" checked></label>
+  </div>
+</div>
+<div class="ft">
+  <button id="dl" disabled>Download PDF</button>
+  <p class="note">Print at 100% scale. Cut along the solid line, fold at the dotted line with the printed side facing out.</p>
+</div>
+</aside>
+<main>
+  <canvas id="prev" aria-label="Preview of the printable sheet"></canvas>
+  <p>Left half: back cover · Right half: front cover</p>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.webgpu.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const PAGES = {letter:[3300,2550], a4:[3508,2480]};       // landscape, 300 DPI
+const CW = 3000, CH = 2100, PAD = 75, BW = CW/2 - 2*PAD, BH = CH - 2*PAD;
+const ENHANCE_BELOW = 200, MIN_DPI = 150;
+const TEMPLATES = ["Made with Love","Made with Love ❤️","Made with Love ✨","Made with Love 🌸",
+  "Made with Love & Crayons 🖍️","Made with Love & Joy 😊","Made with Love, Just for You 💝","Made with Love 🎨",
+  "Handmade with Love 🌿","Crafted with Love & Care","Happy Coloring! 🌈","Thank You for Coloring 🦋","A Little Gift of Love 🎁"];
+const EMOJIS = ["❤️","⭐","🌸","🎨","✨","💕","🌈","🦋","🎁","😊"];
+const FONT = '"Segoe UI","Helvetica Neue",Arial,"Noto Sans Bengali","Nirmala UI",sans-serif';
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const EMO_RE = /(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)/gu;
+let img = null, ai = null;
+
+const mk = (w,h) => Object.assign(document.createElement('canvas'),{width:w,height:h});
+const fitScale = (w,h,m) => (m==='fill'?Math.max:Math.min)(BW/w, BH/h);
+const dpiOf = () => img ? 300 / fitScale(img.width,img.height,$('#mode').value) : 0;
+
+/* ---------- UI setup ---------- */
+$('#tpl').innerHTML = '<option value="">Choose…</option>' + TEMPLATES.map(t=>`<option>${t}</option>`).join('');
+$('#tpl').onchange = e => { if(e.target.value){ $('#tag').value = e.target.value; schedule(); } };
+$('#emo').innerHTML = EMOJIS.map(e=>`<button type="button" title="Insert ${e}">${e}</button>`).join('');
+$('#emo').onclick = e => {
+  if(e.target.tagName!=='BUTTON') return;
+  const t = $('#tag'); t.focus(); t.setRangeText(e.target.textContent, t.selectionStart, t.selectionEnd, 'end'); schedule();
+};
+document.querySelectorAll('select,input').forEach(el => el.addEventListener('input', schedule));
+
+function loadFile(f){
+  if(!f) return;
+  if(!/^image\/(png|jpeg|webp)$/.test(f.type)){ alert('Please choose a PNG, JPG or WebP image.'); return; }
+  const im = new Image();
+  im.onload = () => { img = im; ai = null; $('#fname').textContent = f.name; $('#dl').disabled = false; $('#ai').disabled = false; $('#aist').textContent = ''; schedule(); };
+  im.onerror = () => alert('This image could not be opened. Try a PNG or JPG file.');
+  im.src = URL.createObjectURL(f);
+}
+$('#file').onchange = e => loadFile(e.target.files[0]);
+const drop = $('#drop');
+drop.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); $('#file').click(); } };
+['dragover','dragenter'].forEach(n => drop.addEventListener(n, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(n => drop.addEventListener(n, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+
+/* ---------- image processing ---------- */
+function upscale(src, w){                       // double step by step = sharper than one big jump
+  let c = src;
+  while(c.width*2 < w){
+    const n = mk(c.width*2, c.height*2), x = n.getContext('2d');
+    x.imageSmoothingQuality = 'high'; x.drawImage(c,0,0,n.width,n.height); c = n;
+  }
+  return c;
+}
+function cleanLines(x,w,h){                     // autocontrast, then push to pure black/white
+  const d = x.getImageData(0,0,w,h), p = d.data, hist = new Uint32Array(256), n = w*h;
+  for(let i=0;i<n;i++){ const g = (p[i*4]*.3 + p[i*4+1]*.59 + p[i*4+2]*.11)|0; p[i*4]=g; hist[g]++; }
+  let lo=0, hi=255, a=0;
+  while(lo<255 && (a+=hist[lo]) < n*.01) lo++;
+  a=0; while(hi>0 && (a+=hist[hi]) < n*.01) hi--;
+  if(hi-lo < 20){ lo=0; hi=255; }
+  for(let i=0;i<n;i++){
+    const g = Math.min(255, Math.max(0, (p[i*4]-lo)*255/(hi-lo)));
+    const v = g<=110 ? 0 : g>=175 ? 255 : (g-110)*255/65;
+    p[i*4]=p[i*4+1]=p[i*4+2]=v; p[i*4+3]=255;
+  }
+  x.putImageData(d,0,0);
+}
+function frontCover(){
+  const c = mk(BW,BH), x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0,0,BW,BH);
+  const f = fitScale(img.width,img.height,$('#mode').value), w = img.width*f, h = img.height*f;
+  x.save(); x.beginPath(); x.rect(0,0,BW,BH); x.clip();
+  x.imageSmoothingQuality = 'high';
+  const src = (ai && ai.key === aiKey()) ? ai.canvas : ($('#enh').checked && f > 1) ? upscale(img, w) : img;
+  x.drawImage(src,(BW-w)/2,(BH-h)/2,w,h); x.restore();
+  if($('#clean').checked) cleanLines(x,BW,BH);
+  return c;
+}
+
+/* ---------- emoji -> line art ---------- */
+const EC = {};
+function emojiImg(ch, line){
+  const k = ch + line; if(EC[k]) return EC[k];
+  const N = 256, c = mk(N,N), x = c.getContext('2d');
+  x.font = `${N*.78}px ${EMOJI_FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText(ch, N/2, N/2 + N*.04);
+  if(!line) return EC[k] = c;
+  const sil = mk(N,N), z = sil.getContext('2d');           // black silhouette
+  z.drawImage(c,0,0); z.globalCompositeOperation = 'source-in'; z.fillStyle = '#000'; z.fillRect(0,0,N,N);
+  const out = mk(N,N), o = out.getContext('2d');           // outer outline ring
+  for(let a=0;a<24;a++) o.drawImage(sil, Math.cos(a*Math.PI/12)*16, Math.sin(a*Math.PI/12)*16);
+  o.globalCompositeOperation = 'destination-out'; o.drawImage(sil,0,0); o.globalCompositeOperation = 'source-over';
+  const d = x.getImageData(0,0,N,N).data, v = new Float32Array(N*N);   // inner edges
+  for(let i=0;i<N*N;i++){ const al = d[i*4+3]/255; v[i] = 255 - (255 - (d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11))*al; }
+  const ed = mk(N,N), ex = ed.getContext('2d'), id = ex.createImageData(N,N);
+  for(let y=0;y<N-1;y++) for(let xx=0;xx<N-1;xx++){
+    const i = y*N+xx;
+    if(d[i*4+3] > 200 && Math.abs(v[i]-v[i+1]) + Math.abs(v[i]-v[i+N]) > 50) id.data[i*4+3] = 255;
+  }
+  ex.putImageData(id,0,0);
+  for(let a=0;a<8;a++) o.drawImage(ed, Math.cos(a*Math.PI/4)*5, Math.sin(a*Math.PI/4)*5);
+  return EC[k] = out;
+}
+
+/* ---------- drawing ---------- */
+function richLine(x, text, cx, y, weight, size, maxW){
+  const parts = text.split(EMO_RE), line = $('#line').checked;
+  const widths = () => parts.map((s,i) => {
+    if(i%2) return size*1.15;
+    x.font = `${weight} ${size}px ${FONT}`; return x.measureText(s).width;
+  });
+  let ws = widths(), total = ws.reduce((a,b)=>a+b,0);
+  if(total > maxW){ size *= maxW/total; ws = widths(); total = ws.reduce((a,b)=>a+b,0); }
+  let px = cx - total/2;
+  x.fillStyle = '#000'; x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  parts.forEach((s,i) => {
+    if(i%2){ x.drawImage(emojiImg(s,line), px, y - size*.85, size*1.1, size*1.1); }
+    else { x.font = `${weight} ${size}px ${FONT}`; x.fillText(s, px, y); }
+    px += ws[i];
+  });
+}
+function rrect(x,a,b,w,h,r,lw){ x.lineWidth = lw; x.beginPath(); x.roundRect ? x.roundRect(a,b,w,h,r) : x.rect(a,b,w,h); x.stroke(); }
+function heart(x,cx,cy,s){
+  x.beginPath(); x.moveTo(cx,cy+s);
+  x.bezierCurveTo(cx-1.25*s,cy+.1*s, cx-s,cy-.95*s, cx-.5*s,cy-.95*s);
+  x.bezierCurveTo(cx-.2*s,cy-.95*s, cx,cy-.72*s, cx,cy-.5*s);
+  x.bezierCurveTo(cx,cy-.72*s, cx+.2*s,cy-.95*s, cx+.5*s,cy-.95*s);
+  x.bezierCurveTo(cx+s,cy-.95*s, cx+1.25*s,cy+.1*s, cx,cy+s);
+  x.closePath(); x.stroke();
+}
+function star(x,cx,cy,R){
+  x.beginPath();
+  for(let i=0;i<10;i++){
+    const a = -Math.PI/2 + i*Math.PI/5, r = i%2 ? R*.45 : R;
+    x[i?'lineTo':'moveTo'](cx + r*Math.cos(a), cy + r*Math.sin(a));
+  }
+  x.closePath(); x.stroke();
+}
+function badge(x, cx, cy){
+  const bw = 1110, bh = 810, x0 = cx-bw/2, y0 = cy-bh/2, bot = y0+bh, inner = bw-270;
+  x.strokeStyle = '#000'; x.lineJoin = 'round'; x.lineCap = 'butt';
+  rrect(x,x0,y0,bw,bh,84,12);
+  rrect(x,x0+30,y0+30,bw-60,bh-60,60,6);
+  richLine(x, $('#top').value.trim() || 'Coloring & Creation by:', cx, y0+210, 'bold', 54, inner);
+  x.lineWidth = 8; x.lineCap = 'round'; x.setLineDash([0.1,22]);          // dotted name line
+  x.beginPath(); x.moveTo(x0+150,y0+405); x.lineTo(x0+bw-150,y0+405); x.stroke();
+  x.setLineDash([]); x.lineCap = 'butt';
+  x.lineWidth = 9;
+  if($('#icon').value==='heart') heart(x,cx,bot-294,52);
+  if($('#icon').value==='star') star(x,cx,bot-294,62);
+  const tag = $('#tag').value.trim();
+  if(tag) richLine(x, tag, cx, bot-135, '', 40, inner);
+}
+function render(){
+  const [W,H] = PAGES[$('#page').value], c = $('#prev');
+  c.width = W; c.height = H;
+  const x = c.getContext('2d'), L = (W-CW)/2, T = (H-CH)/2, M = L + CW/2;
+  x.fillStyle = '#fff'; x.fillRect(0,0,W,H);
+  x.strokeStyle = '#a8a8a8'; x.lineWidth = 6; x.strokeRect(L,T,CW,CH);              // cut line
+  x.setLineDash([26,22]); x.beginPath(); x.moveTo(M,T); x.lineTo(M,T+CH); x.stroke(); x.setLineDash([]); // fold
+  if(img) x.drawImage(frontCover(), M+PAD, T+PAD);
+  if($('#back').checked) badge(x, L+CW/4, T+CH/2);
+  x.fillStyle = '#666'; x.font = `40px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.fillText('Print at 100% scale  |  Cut along solid line  |  Fold at center dotted line', W/2, T+CH+60);
+  quality();
+}
+function quality(){
+  const q = $('#qual'), d = dpiOf();
+  if(!img) return;
+  const lvl = d >= ENHANCE_BELOW ? ['good','Good'] : d >= MIN_DPI ? ['fair','Fair'] : ['low','Low'];
+  q.className = lvl[0];
+  q.textContent = `Print quality: ${lvl[1]} (about ${Math.round(d)} DPI)` +
+    (d < ENHANCE_BELOW ? ($('#enh').checked ? ' – sharper enlarging is on' : ' – turn on sharper enlarging') : '');
+}
+let timer;
+function schedule(){ clearTimeout(timer); timer = setTimeout(render, 150); }
+
+/* ---------- AI enhance (Real-ESRGAN x4plus anime 6B, ONNX, runs in the browser) ---------- */
+// 1st: your own copy (fast, reliable). 2nd: public Hugging Face copy, used if the local file is missing.
+const MODEL_URLS = ['models/RealESRGAN_x4plus_anime_6B.onnx',
+  'https://huggingface.co/skillsafe-ai/realesrgan-x4plus-anime-6b/resolve/main/model.onnx'];
+let session = null;
+const aiKey = () => img ? img.src + $('#mode').value : '';
+async function getSession(say, eps){
+  if(session) return session;
+  let r = null;
+  for(const u of MODEL_URLS){
+    try{ r = await fetch(u); if(r.ok && !(r.headers.get('content-type')||'').includes('text/html')) break; }catch(e){}
+    r = null;
+  }
+  if(!r) throw new Error('AI model could not be downloaded');
+  const total = +r.headers.get('content-length') || 0, rd = r.body.getReader(), parts = []; let got = 0;
+  for(;;){ const {done,value} = await rd.read(); if(done) break; parts.push(value); got += value.length;
+    say(total ? `Downloading AI model… ${Math.min(100,Math.round(got/total*100))}%` : 'Downloading AI model…'); }
+  const buf = new Uint8Array(got); let o = 0; for(const p of parts){ buf.set(p,o); o += p.length; }
+  ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/';
+  say('Starting AI engine…');
+  return session = await ort.InferenceSession.create(buf, {executionProviders:eps});
+}
+async function runAI(){
+  const btn = $('#ai'), st = $('#aist'), say = t => st.textContent = t;
+  if(!img) return;
+  const f = fitScale(img.width,img.height,$('#mode').value);
+  if(dpiOf() >= ENHANCE_BELOW){ say('This image is already high resolution – AI is not needed.'); return; }
+  btn.disabled = true;
+  const run = async eps => {
+    const iw = Math.min(img.width, Math.max(64, Math.ceil(img.width*f/4))), ih = Math.round(img.height*iw/img.width);
+    const src = mk(iw,ih), sx = src.getContext('2d');
+    sx.fillStyle = '#fff'; sx.fillRect(0,0,iw,ih); sx.imageSmoothingQuality = 'high'; sx.drawImage(img,0,0,iw,ih);
+    const S = sx.getImageData(0,0,iw,ih).data, sess = await getSession(say, eps);
+    const out = mk(iw*4,ih*4), ox = out.getContext('2d'), T = 128, P = 10;
+    const total = Math.ceil(iw/T)*Math.ceil(ih/T); let n = 0;
+    for(let ty=0; ty<ih; ty+=T) for(let tx=0; tx<iw; tx+=T){
+      const x0 = Math.max(0,tx-P), y0 = Math.max(0,ty-P), x1 = Math.min(iw,tx+T+P), y1 = Math.min(ih,ty+T+P);
+      const w = x1-x0, h = y1-y0, a = new Float32Array(3*w*h);
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+        const i = ((y0+y)*iw + x0+x)*4, j = y*w + x;
+        a[j] = S[i]/255; a[w*h+j] = S[i+1]/255; a[2*w*h+j] = S[i+2]/255;
+      }
+      const res = await sess.run({[sess.inputNames[0]]: new ort.Tensor('float32', a, [1,3,h,w])});
+      const o = res[sess.outputNames[0]].data, W = w*4, H = h*4, id = ox.createImageData(W,H), L = W*H;
+      for(let j=0;j<L;j++){
+        id.data[j*4] = Math.max(0,Math.min(255,o[j]*255)); id.data[j*4+1] = Math.max(0,Math.min(255,o[L+j]*255));
+        id.data[j*4+2] = Math.max(0,Math.min(255,o[2*L+j]*255)); id.data[j*4+3] = 255;
+      }
+      ox.putImageData(id, x0*4, y0*4, (tx-x0)*4, (ty-y0)*4, Math.min(T,iw-tx)*4, Math.min(T,ih-ty)*4);
+      say(`AI enhancing… ${Math.round(++n/total*100)}%`);
+      await new Promise(r => setTimeout(r));          // let the page repaint
+    }
+    ai = {canvas:out, key:aiKey()};
+    say('AI enhancement applied. Use "Clean lines" for the sharpest black & white result.');
+    render();
+  };
+  try{
+    try{ await run(['webgpu','wasm']); }
+    catch(e1){ session = null; say('Retrying with the compatible engine…'); await run(['wasm']); }
+  }catch(e){
+    say('AI enhance failed (' + e.message + '). The normal enlarging is used instead.');
+  }
+  btn.disabled = false;
+}
+$('#ai').onclick = runAI;
+
+$('#dl').onclick = () => {
+  render();
+  const { jsPDF } = window.jspdf, c = $('#prev');
+  const pdf = new jsPDF({orientation:'landscape', unit:'mm', format:$('#page').value});
+  pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), undefined, 'FAST');
+  pdf.save('printable_greeting_card.pdf');
+};
+render();
+</script>
+</body>
+</html>
